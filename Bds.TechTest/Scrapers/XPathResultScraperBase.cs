@@ -1,9 +1,6 @@
 ﻿using HtmlAgilityPack;
-using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Bds.TechTest.Scrapers
 {
@@ -38,8 +35,12 @@ namespace Bds.TechTest.Scrapers
 
             foreach (var resultNode in resultNodes)
             {
-                T result = ExtractResult(resultNode);
-                list.Add(result);
+                var extractionSuccessful = TryExtractResult(resultNode, out T result);
+
+                if (extractionSuccessful)
+                {
+                    list.Add(result);
+                }
             }
 
             return list;
@@ -49,7 +50,8 @@ namespace Bds.TechTest.Scrapers
         /// Extracts the content of the result to an instance
         /// </summary>
         /// <param name="htmlNode">The HTML node containing the search result.</param>
-        /// <returns></returns>
-        protected abstract T ExtractResult(HtmlNode htmlNode);
+        /// <param name="result">Output parameter which will contain the result if extraction was successful.</param>
+        /// <returns>True if the extraction of the result was successful; otherwise false.</returns>
+        protected abstract bool TryExtractResult(HtmlNode htmlNode, out T result);
     }
 }

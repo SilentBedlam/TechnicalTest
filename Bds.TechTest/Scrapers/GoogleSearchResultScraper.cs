@@ -1,19 +1,18 @@
-﻿using Bds.TechTest.Scrapers.Results;
+﻿using Bds.TechTest.Results;
 using HtmlAgilityPack;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace Bds.TechTest.Scrapers
 {
     /// <summary>
     /// Scrapes search results from a Google search result page and extracts them as an object.
     /// </summary>
-    public class GoogleSearchResultScraper : XPathResultScraperBase<GoogleSearchResult>
+    public class GoogleSearchResultScraper : XPathResultScraperBase<ISimpleSearchResult>
     {
-        private const string SearchResultSelector = "//div[contains(concat(' ', @class, ' '), ' g ')]";
+        private const string SearchResultSelector = "//div[@id='search']//div[contains(concat(' ', @class, ' '), ' g ')]";
+        private const string LinkNodeSelector = ".//div[contains(concat(' ', @class, ' '), ' rc ')]/div/a";
 
         /// <summary>
         /// Creates a new GoogleSearchResultScraper instance.
@@ -25,13 +24,32 @@ namespace Bds.TechTest.Scrapers
         }
 
         /// <inheritdoc />
-        protected override GoogleSearchResult ExtractResult(HtmlNode htmlNode)
+        protected override bool TryExtractResult(HtmlNode htmlNode, out ISimpleSearchResult result)
         {
-            // Get the node containing the link to the search result and extract the URI.
-            var linkNode = htmlNode.SelectNodes(".//a").First();
-            var uri = ExtractUrlFromLinkNode(linkNode);
-            var title = ExtractTitleFromLinkNode(linkNode);
-            return new GoogleSearchResult(title, uri);
+            result = null;
+
+            try
+            {
+                // Get the node containing the link to the search result and extract the URI.
+                var linkNode = htmlNode.SelectNodes(LinkNodeSelector).Single();
+
+                // Ignore irrelevant nodes (easier than a super-complicated XPath expression):
+                if (linkNode.Attributes["data-hveid"] != null)
+                {
+                    return false;
+                }
+
+                // Extract the details.
+                var uri = ExtractUrlFromLinkNode(linkNode);
+                var title = ExtractTitleFromLinkNode(linkNode);
+                result = new SimpleSearchResult(title, uri);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -43,12 +61,24 @@ namespace Bds.TechTest.Scrapers
         {
             // The link contains only the relative path so add a simple scheme / host / etc. to keep UriBuilder happy.
             var hrefAttributeContent = WebUtility.HtmlDecode(linkNode.Attributes["href"].Value);
-            var uriBuilder = new UriBuilder($"http://www.google.com{hrefAttributeContent}");
 
-            // Extract the query string parts and find the one named "url". Extract the value from that part and return as a Uri.
-            var queryParts = uriBuilder.Query.Split('&');
-            var urlQueryPart = queryParts.Single(p => p.StartsWith("url", StringComparison.OrdinalIgnoreCase));
-            var url = WebUtility.UrlDecode(urlQueryPart.Split('=')[1]);
+            // If Google are tracking the link, it will start with "/url", otherwise, it's plain.
+            string url;
+
+            if (hrefAttributeContent.StartsWith("/url?", StringComparison.OrdinalIgnoreCase))
+            {
+                var uriBuilder = new UriBuilder(hrefAttributeContent);
+
+                // Extract the query string parts and find the one named "url". Extract the value from that part and return as a Uri.
+                var queryParts = uriBuilder.Query.Split('&');
+                var urlQueryPart = queryParts.Single(p => p.StartsWith("url", StringComparison.OrdinalIgnoreCase));
+                url = WebUtility.UrlDecode(urlQueryPart.Split('=')[1]);
+            }
+            else
+            {
+                url = WebUtility.UrlDecode(hrefAttributeContent);
+            }
+            
             return new Uri(url);
         }
 
