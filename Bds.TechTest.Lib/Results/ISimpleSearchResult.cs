@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Bds.TechTest.Lib
+namespace Bds.TechTest.Lib.Results
 {
     /// <summary>
     /// Contract for a class which expresses a simple search result.

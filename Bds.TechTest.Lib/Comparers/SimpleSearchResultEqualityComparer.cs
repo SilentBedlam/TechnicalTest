@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bds.TechTest.Lib.Results;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -56,9 +57,8 @@ namespace Bds.TechTest.Lib.Comparers
             unchecked
             {
                 var result = 179;
-                // N.b. The Uri.GetHashCode() method has a very weird implementation. I'm presumably missing something about
-                // what it's doing, but for now, just treat the URLs as identical if they look the same as strings...
-                result = (result * 863) ^ StringComparer.OrdinalIgnoreCase.GetHashCode(simpleSearchResult.Uri.OriginalString);
+                result = (result * 863) ^ simpleSearchResult.Uri.GetHashCode();
+                result = (result * 863) ^ simpleSearchResult.Uri.GetHashCode();
                 result = (result * 863) ^ StringComparer.OrdinalIgnoreCase.GetHashCode(simpleSearchResult.PageTitle);
                 return result;
             }

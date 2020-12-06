@@ -1,7 +1,7 @@
 ﻿using HtmlAgilityPack;
 using System.Collections.Generic;
 
-namespace Bds.TechTest.Lib
+namespace Bds.TechTest.Lib.Scrapers
 {
     /// <summary>
     /// Contract for a class which can scrape search results from an HTML document.

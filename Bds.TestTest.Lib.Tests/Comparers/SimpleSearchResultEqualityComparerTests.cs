@@ -1,5 +1,5 @@
-﻿using Bds.TechTest.Lib;
-using Bds.TechTest.Lib.Comparers;
+﻿using Bds.TechTest.Lib.Comparers;
+using Bds.TechTest.Lib.Results;
 using NSubstitute;
 using NUnit.Framework;
 using System;
@@ -24,10 +24,6 @@ namespace Bds.TestTest.Lib.Tests.Comparers
 
         private static readonly List<SimpleSearchResultEqualityComparerTestCase> EqualsTestCases =
             new List<SimpleSearchResultEqualityComparerTestCase>();
-
-        private static readonly List<(ISimpleSearchResult simpleSearchResult, int expectedHash)> GetHashCodeTestCases =
-            new List<(ISimpleSearchResult simpleSearchResultItem, int expectedHash)>();
-
 
         [OneTimeSetUp]
         public void InitializeObjects()
@@ -57,16 +53,6 @@ namespace Bds.TestTest.Lib.Tests.Comparers
                 new SimpleSearchResultEqualityComparerTestCase(null, TestSimpleSearchResult, false),
                 new SimpleSearchResultEqualityComparerTestCase(TestSimpleSearchResult, null, false),
             });
-
-            GetHashCodeTestCases.AddRange(new (ISimpleSearchResult simpleSearchResultItem, int expected)[]
-            {
-                (null, 0),
-                (TestSimpleSearchResult, 297914221),
-                //(ExactCopy, 1000204158),
-                //(DiffersByPageTitle, -870807701),
-                //(DiffersByPageTitleCasing, -870807701),
-                //(DiffersByUri, -1032615386)
-            });
         }
 
         [Test]
@@ -81,28 +67,7 @@ namespace Bds.TestTest.Lib.Tests.Comparers
             }
         }
 
-        [Test]
-        public void CheckGetHashCodeReturnsExpectedValues()
-        {
-            // N.b. This is required because the contents of the collection haven't been initialized by the time a TestCaseSourceAttribute is evaluated.
-            foreach (var testCase in GetHashCodeTestCases)
-            {
-                Assert.That(
-                    SimpleSearchResultEqualityComparer.Instance.GetHashCode(testCase.simpleSearchResult),
-                    Is.EqualTo(testCase.expectedHash));
-            }
-        }
-
-        [Test]
-        public void CheckUriHashCodes()
-        {
-            var first = TestUri1.GetHashCode();
-
-            for (int i = 0; i < 10; i++)
-            {
-                Assert.That(TestUri1.GetHashCode(), Is.EqualTo(first));
-            }
-        }
+        // N.b. In .NET Core hash codes are only consistent in a single program execution, so we can't test for expected hash codes.
 
         /// <summary>
         /// Represents a single test case.

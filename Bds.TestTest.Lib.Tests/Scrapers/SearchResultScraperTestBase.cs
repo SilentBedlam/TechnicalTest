@@ -1,3 +1,4 @@
+using Bds.TechTest.Lib.Results;
 using HtmlAgilityPack;
 using NUnit.Framework;
 using System;
