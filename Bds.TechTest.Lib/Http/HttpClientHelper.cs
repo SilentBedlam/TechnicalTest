@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -23,11 +25,17 @@ namespace Bds.TechTest.Lib.Http
         /// Creates a new HttpClientHelper instance.
         /// </summary>
         /// <param name="logger">Logger instance for the class.</param>
-        public HttpClientHelper(ILogger<HttpClientHelper> logger)
+        public HttpClientHelper(ILogger<HttpClientHelper> logger, IDictionary<string, string> defaultHeaders = null)
         {
             this.logger = logger;
 
-            httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0");
+            if (defaultHeaders != null && defaultHeaders.Any())
+            {
+                foreach (var headerPair in defaultHeaders)
+                {
+                    httpClient.DefaultRequestHeaders.Add(headerPair.Key, headerPair.Value);
+                }
+            }
         }
 
         /// <summary>
@@ -49,7 +57,7 @@ namespace Bds.TechTest.Lib.Http
         /// <param name="responseContentConverter">A response converter which can convert the raw response into a useful class.</param>
         /// <param name="cancellationToken">A CancellationToken to associate with the request.</param>
         /// <returns>An instance of TResponse or throws.</returns>
-        public async Task<IHttpResponseInfo<TResponse>> Get<TResponse>(Uri uri, IResponseContentConverter<TResponse> responseContentConverter, 
+        public async Task<IHttpResponseInfo<TResponse>> Get<TResponse>(Uri uri, IResponseContentConverter<TResponse> responseContentConverter,
             CancellationToken cancellationToken)
             where TResponse : class
         {
