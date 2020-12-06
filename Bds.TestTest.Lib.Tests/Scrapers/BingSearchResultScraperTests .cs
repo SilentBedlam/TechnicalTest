@@ -11,20 +11,20 @@ namespace Bds.TechTest.Lib.Tests
     {
         private static readonly IEnumerable<ISimpleSearchResult> FishSearchExpectedResults = new List<ISimpleSearchResult>
         {
-            new SimpleSearchResult("Fish - Wikipedia", new Uri("https://en.wikipedia.org/wiki/Fish")),
-            new SimpleSearchResult("Fish - Simple English Wikipedia, the free encyclopedia", new Uri("https://simple.wikipedia.org/wiki/Fish")),
-            new SimpleSearchResult("fish | Definition, Species, & Facts | Britannica", new Uri("https://www.britannica.com/animal/fish")),
-            new SimpleSearchResult("THE 10 BEST Seafood Restaurants in Cambridge, Updated ...", new Uri("https://www.tripadvisor.co.uk/Restaurants-g186225-c33-Cambridge_Cambridgeshire_England.html")),
-            new SimpleSearchResult("Fish Pictures & Facts - Animals", new Uri("https://www.nationalgeographic.com/animals/fish/")),
-            new SimpleSearchResult("FISH | meaning in the Cambridge English Dictionary", new Uri("https://dictionary.cambridge.org/dictionary/english/fish")),
+            new SimpleSearchResult("Fish - Wikipedia", new Uri("https://en.wikipedia.org/wiki/Fish"), 1),
+            new SimpleSearchResult("Fish - Simple English Wikipedia, the free encyclopedia", new Uri("https://simple.wikipedia.org/wiki/Fish"), 2),
+            new SimpleSearchResult("fish | Definition, Species, & Facts | Britannica", new Uri("https://www.britannica.com/animal/fish"), 3),
+            new SimpleSearchResult("THE 10 BEST Seafood Restaurants in Cambridge, Updated ...", new Uri("https://www.tripadvisor.co.uk/Restaurants-g186225-c33-Cambridge_Cambridgeshire_England.html"), 4),
+            new SimpleSearchResult("Fish Pictures & Facts - Animals", new Uri("https://www.nationalgeographic.com/animals/fish/"), 5),
+            new SimpleSearchResult("FISH | meaning in the Cambridge English Dictionary", new Uri("https://dictionary.cambridge.org/dictionary/english/fish"), 6),
         };
 
         private static readonly IEnumerable<ISimpleSearchResult> GinSearchExpectedResults = new List<ISimpleSearchResult>
         {
-            new SimpleSearchResult("Grocery: Gin - Amazon.co.uk", new Uri("https://www.amazon.co.uk/gin/b?node=359896031")),
-            new SimpleSearchResult("Gin - Tesco Groceries", new Uri("https://www.tesco.com/groceries/en-GB/shop/drinks/spirits/gin")),
-            new SimpleSearchResult("Gin, Flavoured Gin & Dry Gin Selections | ALDI UK", new Uri("https://www.aldi.co.uk/c/spirits/Gin")),
-            new SimpleSearchResult("Cambridge Distillery | Dedicated to Creating Outstanding Gins", new Uri("https://cambridgedistillery.co.uk/")),
+            new SimpleSearchResult("Grocery: Gin - Amazon.co.uk", new Uri("https://www.amazon.co.uk/gin/b?node=359896031"), 1),
+            new SimpleSearchResult("Gin - Tesco Groceries", new Uri("https://www.tesco.com/groceries/en-GB/shop/drinks/spirits/gin"), 2),
+            new SimpleSearchResult("Gin, Flavoured Gin & Dry Gin Selections | ALDI UK", new Uri("https://www.aldi.co.uk/c/spirits/Gin"), 3),
+            new SimpleSearchResult("Cambridge Distillery | Dedicated to Creating Outstanding Gins", new Uri("https://cambridgedistillery.co.uk/"), 4),
         };
 
         private static readonly IEnumerable<SearchResultScraperTestCase> TestCases = new List<SearchResultScraperTestCase>

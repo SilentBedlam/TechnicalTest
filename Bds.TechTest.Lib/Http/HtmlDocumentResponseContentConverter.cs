@@ -12,8 +12,10 @@ namespace Bds.TechTest.Lib.Http
         /// <inheritdoc />
         public async Task<HtmlDocument> ConvertFrom(HttpContent httpContent)
         {
+            var htmlContent = await httpContent.ReadAsStringAsync();
+
             var htmlDocument = new HtmlDocument();
-            htmlDocument.Load(await httpContent.ReadAsStreamAsync());
+            htmlDocument.LoadHtml(htmlContent);
             return htmlDocument;
         }
     }

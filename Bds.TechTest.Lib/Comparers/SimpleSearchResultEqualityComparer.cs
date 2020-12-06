@@ -7,6 +7,7 @@ namespace Bds.TechTest.Lib.Comparers
 {
     /// <summary>
     /// A default implementation of an equality comparer for simple search results.
+    /// Rank is not considered as part of the equality / hashing operations.
     /// </summary>
     public class SimpleSearchResultEqualityComparer : EqualityComparer<ISimpleSearchResult>
     {

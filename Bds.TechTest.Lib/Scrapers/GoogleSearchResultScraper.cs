@@ -24,7 +24,7 @@ namespace Bds.TechTest.Lib.Scrapers
         }
 
         /// <inheritdoc />
-        protected override bool TryExtractResult(HtmlNode htmlNode, out ISimpleSearchResult result)
+        protected override bool TryExtractResult(HtmlNode htmlNode, int currentIndex, out ISimpleSearchResult result)
         {
             result = null;
 
@@ -42,7 +42,7 @@ namespace Bds.TechTest.Lib.Scrapers
                 // Extract the details.
                 var uri = ExtractUrlFromLinkNode(linkNode);
                 var title = ExtractTitleFromLinkNode(linkNode);
-                result = new SimpleSearchResult(title, uri);
+                result = new SimpleSearchResult(title, uri, currentIndex);
 
                 return true;
             }

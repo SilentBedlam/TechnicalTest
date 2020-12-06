@@ -13,7 +13,7 @@ namespace Bds.TechTest.Lib.Results
         /// </summary>
         /// <param name="pageTitle">The title associated with the result.</param>
         /// <param name="uri">The URI to which the search result points.</param>
-        public SimpleSearchResult(string pageTitle, Uri uri)
+        public SimpleSearchResult(string pageTitle, Uri uri, int rank)
         {
             if (string.IsNullOrWhiteSpace(pageTitle))
             {
@@ -25,8 +25,14 @@ namespace Bds.TechTest.Lib.Results
                 throw new ArgumentNullException(nameof(uri));
             }
 
+            if (rank < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(rank), "The rank must be a positive integer.");
+            }
+
             PageTitle = pageTitle;
             Uri = uri;
+            Rank = rank;
         }
 
         /// <summary>
@@ -38,6 +44,11 @@ namespace Bds.TechTest.Lib.Results
         /// The URI to which the search result points.
         /// </summary>
         public Uri Uri { get; set; }
+
+        /// <summary>
+        /// The rank associated with this search result.
+        /// </summary>
+        public int Rank { get; }
 
         /// <inheritdoc />
         public override bool Equals(object obj)

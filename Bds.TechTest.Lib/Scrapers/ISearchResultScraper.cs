@@ -12,8 +12,9 @@ namespace Bds.TechTest.Lib.Scrapers
         /// <summary>
         /// Scrapes search results from the specified HTML page.
         /// </summary>
-        /// <param name="argumentTBD">TBD.</param>
+        /// <param name="htmlDocument">The HtmlDocument containing the search results.</param>
+        /// <param name="indexOffset">Optionally, an index value to use which offsets the search result rankings.</param>
         /// <returns>A collection of <see cref="T"/> representing the search results.</returns>
-        IEnumerable<T> ScrapeResults(HtmlDocument htmlDocument);
+        IEnumerable<T> ScrapeResults(HtmlDocument htmlDocument, int indexOffset = 0);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Bds.TechTest.Lib.Scrapers
 {
@@ -28,18 +29,22 @@ namespace Bds.TechTest.Lib.Scrapers
         }
 
         /// <inheritdoc />
-        public IEnumerable<T> ScrapeResults(HtmlDocument htmlDocument)
+        public IEnumerable<T> ScrapeResults(HtmlDocument htmlDocument, int indexOffset = 0)
         {
             var resultNodes = htmlDocument.DocumentNode.SelectNodes(resultXPathSelector);
             var list = new List<T>(resultNodes.Count);
+            var currentIndex = indexOffset > 0 ? indexOffset : 0;
 
-            foreach (var resultNode in resultNodes)
+            if (resultNodes != null && resultNodes.Any())
             {
-                var extractionSuccessful = TryExtractResult(resultNode, out T result);
-
-                if (extractionSuccessful)
+                foreach (var resultNode in resultNodes)
                 {
-                    list.Add(result);
+                    var extractionSuccessful = TryExtractResult(resultNode, ++currentIndex, out T result);
+
+                    if (extractionSuccessful)
+                    {
+                        list.Add(result);
+                    }
                 }
             }
 
@@ -50,8 +55,9 @@ namespace Bds.TechTest.Lib.Scrapers
         /// Extracts the content of the result to an instance
         /// </summary>
         /// <param name="htmlNode">The HTML node containing the search result.</param>
+        /// <param name="currentIndex">The current index of the search result.</param>
         /// <param name="result">Output parameter which will contain the result if extraction was successful.</param>
         /// <returns>True if the extraction of the result was successful; otherwise false.</returns>
-        protected abstract bool TryExtractResult(HtmlNode htmlNode, out T result);
+        protected abstract bool TryExtractResult(HtmlNode htmlNode, int currentIndex, out T result);
     }
 }
