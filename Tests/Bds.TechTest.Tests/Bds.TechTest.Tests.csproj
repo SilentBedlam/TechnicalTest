@@ -7,20 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\BingSearchResult-Fish.html" />
-    <None Remove="Resources\BingSearchResult-Gin.html" />
-    <None Remove="Resources\GoogleSearchResult-Fish.html" />
-    <None Remove="Resources\GoogleSearchResult-Gin.html" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\BingSearchResult-Gin.html" />
-    <EmbeddedResource Include="Resources\BingSearchResult-Fish.html" />
-    <EmbeddedResource Include="Resources\GoogleSearchResult-Gin.html" />
-    <EmbeddedResource Include="Resources\GoogleSearchResult-Fish.html" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.11.28" />
     <PackageReference Include="nunit" Version="3.11.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.11.0" />

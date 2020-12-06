@@ -6,7 +6,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 
-namespace Bds.TechTest.Tests
+namespace Bds.TechTest.Lib.Tests
 {
     /// <summary>
     /// Base class for scraper tests all having a simillar format.
@@ -89,6 +89,9 @@ namespace Bds.TechTest.Tests
             /// The search results expected by the test case.
             /// </summary>
             public IEnumerable<ISimpleSearchResult> ExpectedSearchResults { get; private set; }
+
+            /// <inheritdoc />
+            public override string ToString() => ResourceName;
         }
     }
 }

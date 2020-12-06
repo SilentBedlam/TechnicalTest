@@ -1,7 +1,7 @@
-﻿using Bds.TechTest.Comparers;
+﻿using Bds.TechTest.Lib.Comparers;
 using System;
 
-namespace Bds.TechTest.Results
+namespace Bds.TechTest.Lib.Results
 {
     /// <summary>
     /// Represents the data associated with a simple search result.

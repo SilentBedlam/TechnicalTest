@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Bds.TechTest.Scrapers
+namespace Bds.TechTest.Lib.Scrapers
 {
     /// <summary>
     /// Base class for a class which can identify search results in an HTML page using an XPath expression and extract them to an object representing their content.

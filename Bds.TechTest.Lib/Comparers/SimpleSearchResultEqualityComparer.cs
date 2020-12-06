@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Bds.TechTest.Comparers
+namespace Bds.TechTest.Lib.Comparers
 {
     /// <summary>
     /// A default implementation of an equality comparer for simple search results.
@@ -42,7 +42,7 @@ namespace Bds.TechTest.Comparers
                 return true;
             }
 
-            return first.Uri.Equals(second.Uri) && StringComparer.Ordinal.Equals(first.PageTitle, second.PageTitle);
+            return first.Uri.Equals(second.Uri) && StringComparer.OrdinalIgnoreCase.Equals(first.PageTitle, second.PageTitle);
         }
 
         /// <inheritdoc />
@@ -56,7 +56,9 @@ namespace Bds.TechTest.Comparers
             unchecked
             {
                 var result = 179;
-                result = (result * 863) ^ simpleSearchResult.Uri.GetHashCode();
+                // N.b. The Uri.GetHashCode() method has a very weird implementation. I'm presumably missing something about
+                // what it's doing, but for now, just treat the URLs as identical if they look the same as strings...
+                result = (result * 863) ^ StringComparer.OrdinalIgnoreCase.GetHashCode(simpleSearchResult.Uri.OriginalString);
                 result = (result * 863) ^ StringComparer.OrdinalIgnoreCase.GetHashCode(simpleSearchResult.PageTitle);
                 return result;
             }

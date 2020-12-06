@@ -1,10 +1,10 @@
-﻿using Bds.TechTest.Results;
+﻿using Bds.TechTest.Lib.Results;
 using HtmlAgilityPack;
 using System;
 using System.Linq;
 using System.Net;
 
-namespace Bds.TechTest.Scrapers
+namespace Bds.TechTest.Lib.Scrapers
 {
     /// <summary>
     /// Scrapes search results from a Google search result page and extracts them as an object.

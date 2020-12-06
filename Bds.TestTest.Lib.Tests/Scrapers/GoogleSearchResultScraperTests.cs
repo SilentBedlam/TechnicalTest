@@ -1,10 +1,10 @@
-using Bds.TechTest.Results;
-using Bds.TechTest.Scrapers;
+using Bds.TechTest.Lib.Results;
+using Bds.TechTest.Lib.Scrapers;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 
-namespace Bds.TechTest.Tests
+namespace Bds.TechTest.Lib.Tests
 {
     [TestFixture]
     public class GoogleSearchResultScraperTests : SearchResultScraperTestBase
