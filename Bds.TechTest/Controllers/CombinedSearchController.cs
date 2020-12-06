@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Bds.TechTest.Dto;
-using Bds.TechTest.Lib.Comparers;
 using Bds.TechTest.Lib.Http;
 using Bds.TechTest.Lib.Orchestration;
 using Bds.TechTest.Lib.Results;
@@ -24,14 +22,13 @@ namespace Bds.TechTest
         private static readonly HttpClientHelper HttpClientHelper = new HttpClientHelper(NullLogger<HttpClientHelper>.Instance);
 
         /// <summary>
-        /// 
+        /// Definitions for the search engines supported by this controller.
         /// </summary>
         private static readonly IList<ISearchEngineDefinition<ISimpleSearchResult>> SearchEngineDefinitions = new List<ISearchEngineDefinition<ISimpleSearchResult>>
         {
             new SearchEngineDefinition<ISimpleSearchResult>(
                 "Google", "https://www.google.com/search?client=firefox-b-d&q={0}", new GoogleSearchResultScraper(), Firefox83UserAgentString),
-            new SearchEngineDefinition<ISimpleSearchResult>(
-                "Bing", "https://www.bing.com/search?q={0}", new BingSearchResultScraper(), Firefox83UserAgentString)
+            new SearchEngineDefinition<ISimpleSearchResult>("Bing", "https://www.bing.com/search?q={0}", new BingSearchResultScraper())
         };
         
         /// <summary>
@@ -91,33 +88,32 @@ namespace Bds.TechTest
             }
 
             // Extract and match the results from each of the collections.
-            var resultSets = tasks.Select(t => t.Result as SearchResultsSet<ISimpleSearchResult>).ToList();
-            var distinctUris = resultSets.SelectMany(r => r.SearchResults).Select(r => r.Uri).Distinct(IgnoresFragmentUriEqualityComparer.Instance);
             var combinedSearchResultDtos = new List<CombinedSearchResultDto>();
-
-            foreach (var uri in distinctUris)
+            var searchResultSets = tasks.Select(t => t.Result as SearchResultsSet<ISimpleSearchResult>).ToList();
+            var searchResultsByUriLookup = searchResultSets
+                .SelectMany(srs => 
+                    srs.SearchResults.Select(r => new { Result = r, SearchEngineDefinition = srs.SearchEngineDefinition }))
+                .ToLookup(p => p.Result.Uri);
+            
+            foreach (var kvp in searchResultsByUriLookup)
             {
-                var relevantResults = resultSets
-                    .SelectMany(r => r.SearchResults)
-                    .Where(sr => IgnoresFragmentUriEqualityComparer.Instance.Equals(uri, sr.Uri))
-                    .OrderByDescending(r => r.Rank)
-                    .ToArray();
+                var orderedSearchResults = searchResultsByUriLookup[kvp.Key].OrderBy(r => r.Result.Rank).ToArray();
 
                 var combinedSearchResultDto = new CombinedSearchResultDto
                 {
-                    AverageRank = relevantResults.Average(r => Convert.ToDouble(r.Rank)),
-                    RawSearchResults = relevantResults.Select(r =>
+                    AverageRank = orderedSearchResults.Average(r => Convert.ToDouble(r.Result.Rank)),
+                    RawSearchResults = orderedSearchResults.Select(r =>
                     {
                         return new RawSearchResultDto
                         {
-                            ProviderName = null, // TBC.
-                            PageTitle = r.PageTitle,
-                            Rank = r.Rank,
-                            Uri = r.Uri
+                            ProviderName = r.SearchEngineDefinition.ProviderName,
+                            PageTitle = r.Result.PageTitle,
+                            Rank = r.Result.Rank,
+                            Uri = r.Result.Uri
                         };
                     }),
-                    PageTitle = relevantResults.First().PageTitle,
-                    Uri = uri
+                    PageTitle = orderedSearchResults.First().Result.PageTitle,
+                    Uri = kvp.Key
                 };
 
                 combinedSearchResultDtos.Add(combinedSearchResultDto);
@@ -126,6 +122,6 @@ namespace Bds.TechTest
             results.SearchResults = combinedSearchResultDtos.OrderBy(dto => dto.AverageRank).ToList();
             results.Messages = new List<string> { "All search engines were queried successfully." };
             return new OkObjectResult(results);
-        }       
+        }
     }
 }
