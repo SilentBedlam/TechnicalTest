@@ -38,10 +38,12 @@ namespace Bds.TechTest.Lib.Orchestration
 
             // Create a properly-configured HttpClientHelper instance.
             var httpClientHelperLogger = loggerFactory.CreateLogger<HttpClientHelper>();
-            var defaultHeaders = new Dictionary<string, string>
+            var defaultHeaders = new Dictionary<string, string>();
+
+            if (!string.IsNullOrWhiteSpace(searchEngineDefinition.UserAgentString))
             {
-                { "User-Agent", searchEngineDefinition.UserAgentString }
-            };
+                defaultHeaders.Add("User-Agent", searchEngineDefinition.UserAgentString);
+            }
 
             httpClientHelper = new HttpClientHelper(httpClientHelperLogger, defaultHeaders);            
         }

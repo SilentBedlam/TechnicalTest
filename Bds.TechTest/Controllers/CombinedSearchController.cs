@@ -19,8 +19,6 @@ namespace Bds.TechTest
     {
         private const string Firefox83UserAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0";
 
-        private static readonly HttpClientHelper HttpClientHelper = new HttpClientHelper(NullLogger<HttpClientHelper>.Instance);
-
         /// <summary>
         /// Definitions for the search engines supported by this controller.
         /// </summary>
@@ -55,46 +53,69 @@ namespace Bds.TechTest
                 .Select(o => o.Execute(searchRequestDto.SearchTerm))
                 // N.b. ToList() forces immediate evaluation of the iterator here (i.e. runs the tasks).
                 .ToList();
-            await Task.WhenAll(tasks);
-
-            var results = new CombinedSearchResultsDto();
+            await Task.WhenAll(tasks);            
 
             // Check whether the tasks were successful. If they were, match the results and link.
             if (!tasks.All(t => t.IsCompletedSuccessfully))
             {
-                // Unpack the exceptions and return.
-                var exceptionMessages = tasks
-                    .Where(t => t.IsFaulted && t.Exception != null)
-                    .Select(t =>
-                    {
-                        var exceptionInner = t.Exception;
-
-                        if (exceptionInner is AggregateException aggregateException)
-                        {
-                            exceptionInner = aggregateException.Flatten();
-                        }
-
-                        return exceptionInner;
-                    })
-                    .Aggregate(new List<string>(), (list, ex) => 
-                    {
-                        list.Add(ex.Message);
-                        return list;
-                    })
-                    .ToList();
-
-                results.Messages = exceptionMessages;
-                return new ObjectResult(results) { StatusCode = 500 };
+                CombinedSearchResultsDto errorResponse = CreateErrorResponse(tasks);
+                return new ObjectResult(errorResponse) { StatusCode = 500 };
             }
 
             // Extract and match the results from each of the collections.
-            var combinedSearchResultDtos = new List<CombinedSearchResultDto>();
             var searchResultSets = tasks.Select(t => t.Result as SearchResultsSet<ISimpleSearchResult>).ToList();
+            var successResponse = ExtractAndCombineResults(searchResultSets);
+            return new OkObjectResult(successResponse);
+        }
+
+        /// <summary>
+        /// Creates a CombinedSearchResultsDto which represents an error response, combining the exception messages from the failing search tasks.
+        /// </summary>
+        /// <param name="tasks">The collection of search Tasks which were executed.</param>
+        /// <returns>A CombinedSearchResultsDto representing an error.</returns>
+        private static CombinedSearchResultsDto CreateErrorResponse(List<Task<SearchResultsSet<ISimpleSearchResult>>> tasks)
+        {
+            // Unpack the exceptions and return.
+            var exceptionMessages = tasks
+                .Where(t => t.IsFaulted && t.Exception != null)
+                .Select(t =>
+                {
+                    var exceptionInner = t.Exception;
+
+                    if (exceptionInner is AggregateException aggregateException)
+                    {
+                        exceptionInner = aggregateException.Flatten();
+                    }
+
+                    return exceptionInner;
+                })
+                .Aggregate(new List<string>(), (list, ex) =>
+                {
+                    list.Add(ex.Message);
+                    return list;
+                })
+                .ToList();
+
+            var errorResponse = new CombinedSearchResultsDto { Messages = exceptionMessages };
+            return errorResponse;
+        }
+
+        /// <summary>
+        /// Extracts and combines search results from different result sets, ordering them by the average rank from all search engines in descending order.
+        /// 
+        /// Possible extension: Create new business objects and mappers to allow abstraction of the algorithm so that result processing behaviour can be tuned.
+        /// </summary>
+        /// <param name="searchResultSets"></param>
+        /// <returns>A CombinedSearchResultsDto representing a</returns>
+        private static CombinedSearchResultsDto ExtractAndCombineResults(IEnumerable<SearchResultsSet<ISimpleSearchResult>> searchResultSets)
+        {
+            var combinedSearchResultDtos = new List<CombinedSearchResultDto>();
+
             var searchResultsByUriLookup = searchResultSets
-                .SelectMany(srs => 
+                .SelectMany(srs =>
                     srs.SearchResults.Select(r => new { Result = r, SearchEngineDefinition = srs.SearchEngineDefinition }))
                 .ToLookup(p => p.Result.Uri);
-            
+
             foreach (var kvp in searchResultsByUriLookup)
             {
                 var orderedSearchResults = searchResultsByUriLookup[kvp.Key].OrderBy(r => r.Result.Rank).ToArray();
@@ -119,9 +140,11 @@ namespace Bds.TechTest
                 combinedSearchResultDtos.Add(combinedSearchResultDto);
             }
 
-            results.SearchResults = combinedSearchResultDtos.OrderBy(dto => dto.AverageRank).ToList();
-            results.Messages = new List<string> { "All search engines were queried successfully." };
-            return new OkObjectResult(results);
+            return new CombinedSearchResultsDto
+            {
+                SearchResults = combinedSearchResultDtos.OrderBy(dto => dto.AverageRank).ToList(),
+                Messages = new List<string> { "All search engines were queried successfully." }
+            };
         }
     }
 }
