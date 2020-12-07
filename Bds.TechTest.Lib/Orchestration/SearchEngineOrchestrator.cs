@@ -2,7 +2,6 @@
 using Bds.TechTest.Lib.Results;
 using Bds.TechTest.Lib.SearchEngines;
 using HtmlAgilityPack;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -21,23 +20,18 @@ namespace Bds.TechTest.Lib.Orchestration
         private static readonly IResponseContentConverter<HtmlDocument> HttpContentConverter = new HtmlDocumentResponseContentConverter();
 
         private readonly ISearchEngineDefinition<T> searchEngineDefinition;
-        private readonly HttpClientHelper httpClientHelper;
+        private readonly IHttpClientHelper httpClientHelper;
 
         /// <summary>
         /// Creates a new SearchEngineOrchestrator instance.
         /// </summary>
-        /// <param name="searchEngineDefinition"></param>
-        public SearchEngineOrchestrator(ISearchEngineDefinition<T> searchEngineDefinition, ILoggerFactory loggerFactory)
+        /// <param name="searchEngineDefinition">The ISearchEngineDefinition with which this orchestrator is associated.</param>
+        /// <param name="httpClientHelperProvider">An IHttpClientHelperProvider to be used by this instance.</param>
+        public SearchEngineOrchestrator(ISearchEngineDefinition<T> searchEngineDefinition, IHttpClientHelperProvider httpClientHelperProvider)
         {
             this.searchEngineDefinition = searchEngineDefinition ?? throw new ArgumentNullException(nameof(searchEngineDefinition));
-            
-            if (loggerFactory == null)
-            {
-                throw new ArgumentNullException(nameof(loggerFactory));
-            }
 
             // Create a properly-configured HttpClientHelper instance.
-            var httpClientHelperLogger = loggerFactory.CreateLogger<HttpClientHelper>();
             var defaultHeaders = new Dictionary<string, string>();
 
             if (!string.IsNullOrWhiteSpace(searchEngineDefinition.UserAgentString))
@@ -45,7 +39,8 @@ namespace Bds.TechTest.Lib.Orchestration
                 defaultHeaders.Add("User-Agent", searchEngineDefinition.UserAgentString);
             }
 
-            httpClientHelper = new HttpClientHelper(httpClientHelperLogger, defaultHeaders);            
+            httpClientHelper = httpClientHelperProvider.GetHttpClientHelper();
+            httpClientHelper.SetDefaultRequestHeaders(defaultHeaders);
         }
 
         /// <inheritdoc />

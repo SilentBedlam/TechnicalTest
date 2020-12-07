@@ -9,6 +9,7 @@ using Bds.TechTest.Lib.Results;
 using Bds.TechTest.Lib.Scrapers;
 using Bds.TechTest.Lib.SearchEngines;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Bds.TechTest
@@ -48,7 +49,8 @@ namespace Bds.TechTest
             }
 
             // Compile a collection of tasks representing the requests for each search engine.
-            var searchEngineOrchestrators = SearchEngineDefinitions.Select(d => new SearchEngineOrchestrator<ISimpleSearchResult>(d, NullLoggerFactory.Instance));
+            var httpClientHelperProvider = new DefaultHttpClientHelperProvider(NullLoggerFactory.Instance);
+            var searchEngineOrchestrators = SearchEngineDefinitions.Select(d => new SearchEngineOrchestrator<ISimpleSearchResult>(d, httpClientHelperProvider));
             var tasks = searchEngineOrchestrators
                 .Select(o => o.Execute(searchRequestDto.SearchTerm))
                 // N.b. ToList() forces immediate evaluation of the iterator here (i.e. runs the tasks).

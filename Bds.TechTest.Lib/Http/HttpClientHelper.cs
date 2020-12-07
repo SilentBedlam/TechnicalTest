@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -12,7 +11,7 @@ namespace Bds.TechTest.Lib.Http
     /// <summary>
     /// Helper class which wraps an HttpClient instance and performs useful functions.
     /// </summary>
-    public class HttpClientHelper
+    public class HttpClientHelper : IHttpClientHelper
     {
         /// <summary>
         /// Single instance shared across the application.
@@ -20,48 +19,36 @@ namespace Bds.TechTest.Lib.Http
         private static readonly HttpClient httpClient = new HttpClient();
 
         private readonly ILogger<HttpClientHelper> logger;
+        
+        private IDictionary<string, string> defaultHeaders = new Dictionary<string, string>();
 
         /// <summary>
         /// Creates a new HttpClientHelper instance.
         /// </summary>
         /// <param name="logger">Logger instance for the class.</param>
-        public HttpClientHelper(ILogger<HttpClientHelper> logger, IDictionary<string, string> defaultHeaders = null)
+        public HttpClientHelper(ILogger<HttpClientHelper> logger)
         {
             this.logger = logger;
-
-            if (defaultHeaders != null && defaultHeaders.Any())
-            {
-                foreach (var headerPair in defaultHeaders)
-                {
-                    httpClient.DefaultRequestHeaders.Add(headerPair.Key, headerPair.Value);
-                }
-            }
         }
 
-        /// <summary>
-        /// Performs a GET request to the specified URL.
-        /// </summary>
-        /// <param name="uri">The Uri to which the request should be sent.</param>
-        /// <param name="cancellationToken">A CancellationToken to associate with the request.</param>
-        /// <returns>An instance of TResponse or throws.</returns>
+        /// <inheritdoc />
         public async Task<IHttpResponseInfo> Get(Uri uri, CancellationToken cancellationToken)
         {
             return await SendRequest(uri, HttpMethod.Get, cancellationToken);
         }
 
-        /// <summary>
-        /// Performs a GET request expecting response content to the specified URL.
-        /// </summary>
-        /// <typeparam name="TResponse">The type into which the response should be deserialized.</typeparam>
-        /// <param name="uri">The Uri to which the request should be sent.</param>
-        /// <param name="responseContentConverter">A response converter which can convert the raw response into a useful class.</param>
-        /// <param name="cancellationToken">A CancellationToken to associate with the request.</param>
-        /// <returns>An instance of TResponse or throws.</returns>
+        /// <inheritdoc />
         public async Task<IHttpResponseInfo<TResponse>> Get<TResponse>(Uri uri, IResponseContentConverter<TResponse> responseContentConverter,
             CancellationToken cancellationToken)
             where TResponse : class
         {
             return await SendRequestExpectingResponseContent<TResponse>(uri, HttpMethod.Get, responseContentConverter, cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public void SetDefaultRequestHeaders(IDictionary<string, string> defaultHeaders = null)
+        {
+            this.defaultHeaders = defaultHeaders ?? new Dictionary<string, string>();
         }
 
         /// <summary>
@@ -77,6 +64,12 @@ namespace Bds.TechTest.Lib.Http
 
             using (var request = new HttpRequestMessage(httpMethod, uri))
             {
+                // Add the headers.
+                foreach (var headerPair in defaultHeaders)
+                {
+                    request.Headers.Add(headerPair.Key, headerPair.Value);
+                }
+
                 using (var response = await httpClient.SendAsync(request, cancellationToken))
                 {
                     return new HttpResponseInfo(response.StatusCode, new HttpRequestInfo(uri, httpMethod));
@@ -92,7 +85,7 @@ namespace Bds.TechTest.Lib.Http
         /// <param name="httpMethod">The HTTP method to send with the request.</param>
         /// <param name="cancellationToken">A CancellationToken to associate with the request.</param>
         /// <returns>An HttpResponseInfo instance of type TResponse.</returns>
-        private async Task<IHttpResponseInfo<TResponse>> SendRequestExpectingResponseContent<TResponse>(Uri uri, HttpMethod httpMethod, 
+        private async Task<IHttpResponseInfo<TResponse>> SendRequestExpectingResponseContent<TResponse>(Uri uri, HttpMethod httpMethod,
             IResponseContentConverter<TResponse> responseContentConverter, CancellationToken cancellationToken)
             where TResponse : class
         {
@@ -100,6 +93,12 @@ namespace Bds.TechTest.Lib.Http
 
             using (var request = new HttpRequestMessage(httpMethod, uri))
             {
+                // Add the headers.
+                foreach (var headerPair in defaultHeaders)
+                {
+                    request.Headers.Add(headerPair.Key, headerPair.Value);
+                }
+
                 using (var response = await httpClient.SendAsync(request, cancellationToken))
                 {
                     return await ParseHttpContentAndConstructResponse(
