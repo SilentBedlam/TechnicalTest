@@ -17,6 +17,7 @@ namespace Bds.TechTest.Lib.Orchestration
     public class SearchEngineOrchestrator<T> : ISearchEngineOrchestrator<T>
         where T : ISimpleSearchResult
     {
+        // Possible improvement: make this injectable to customize response handling if required.
         private static readonly IResponseContentConverter<HtmlDocument> HttpContentConverter = new HtmlDocumentResponseContentConverter();
 
         private readonly ISearchEngineDefinition<T> searchEngineDefinition;
@@ -30,6 +31,11 @@ namespace Bds.TechTest.Lib.Orchestration
         public SearchEngineOrchestrator(ISearchEngineDefinition<T> searchEngineDefinition, IHttpClientHelperProvider httpClientHelperProvider)
         {
             this.searchEngineDefinition = searchEngineDefinition ?? throw new ArgumentNullException(nameof(searchEngineDefinition));
+
+            if (httpClientHelperProvider == null)
+            {
+                throw new ArgumentNullException(nameof(httpClientHelperProvider));
+            }
 
             // Create a properly-configured HttpClientHelper instance.
             var defaultHeaders = new Dictionary<string, string>();

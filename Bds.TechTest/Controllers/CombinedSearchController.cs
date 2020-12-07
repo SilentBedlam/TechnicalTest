@@ -9,7 +9,6 @@ using Bds.TechTest.Lib.Results;
 using Bds.TechTest.Lib.Scrapers;
 using Bds.TechTest.Lib.SearchEngines;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Bds.TechTest
@@ -60,7 +59,7 @@ namespace Bds.TechTest
             // Check whether the tasks were successful. If they were, match the results and link.
             if (!tasks.All(t => t.IsCompletedSuccessfully))
             {
-                CombinedSearchResultsDto errorResponse = CreateErrorResponse(tasks);
+                var errorResponse = CreateErrorResponse(tasks);
                 return new ObjectResult(errorResponse) { StatusCode = 500 };
             }
 
@@ -107,7 +106,7 @@ namespace Bds.TechTest
         /// 
         /// Possible extension: Create new business objects and mappers to allow abstraction of the algorithm so that result processing behaviour can be tuned.
         /// </summary>
-        /// <param name="searchResultSets"></param>
+        /// <param name="searchResultSets">A collection of SearchResultSet instances representing the results for the various search engines.</param>
         /// <returns>A CombinedSearchResultsDto representing a</returns>
         private static CombinedSearchResultsDto ExtractAndCombineResults(IEnumerable<SearchResultsSet<ISimpleSearchResult>> searchResultSets)
         {

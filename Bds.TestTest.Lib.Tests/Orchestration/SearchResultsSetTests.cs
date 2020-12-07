@@ -27,7 +27,5 @@ namespace Bds.TestTest.Lib.Tests.Orchestration
             Assert.Throws<ArgumentNullException>(() =>
                 new SearchResultsSet<ISimpleSearchResult>(MockSearchEngineDefinition, null));
         }
-
-        // TBC - Rearrange class and allow injection of the HttpClientHelper instance. Test methods.
     }
 }

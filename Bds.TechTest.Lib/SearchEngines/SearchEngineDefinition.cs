@@ -15,7 +15,8 @@ namespace Bds.TechTest.Lib.SearchEngines
         /// Creates a new SearchEngineDefinition instance.
         /// </summary>
         /// <param name="providerName">The name of the search engine provider (for reference).</param>
-        /// <param name="uriFormat">A format string which can be transformed to a URI containing a search term.</param>
+        /// <param name="uriFormat">A format string which can be transformed to a URI containing a search term. Values will be used to replace 
+        /// tokens in the format "{N}" where [N = 0: search term].</param>
         /// <param name="resultScraper">An <see cref="ISearchResultScraper{T}"/> instance which can extract the search results from the returned HTML page.</param>
         /// <param name="userAgentString">Optionally, the user agent string which should be used to retrieve the data.</param>
         public SearchEngineDefinition(string providerName, string uriFormat, ISearchResultScraper<T> resultScraper, string userAgentString = null)
