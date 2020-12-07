@@ -49,7 +49,8 @@ namespace Bds.TechTest
 
             // Compile a collection of tasks representing the requests for each search engine.
             var httpClientHelperProvider = new DefaultHttpClientHelperProvider(NullLoggerFactory.Instance);
-            var searchEngineOrchestrators = SearchEngineDefinitions.Select(d => new SearchEngineOrchestrator<ISimpleSearchResult>(d, httpClientHelperProvider));
+            var searchEngineOrchestrators = SearchEngineDefinitions
+                .Select(d => new SearchEngineOrchestrator<ISimpleSearchResult>(d, httpClientHelperProvider));
             var tasks = searchEngineOrchestrators
                 .Select(o => o.Execute(searchRequestDto.SearchTerm))
                 // N.b. ToList() forces immediate evaluation of the iterator here (i.e. runs the tasks).
